@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const { connect } = require('../connect');
 
 const {
   requireAuth,
@@ -9,7 +10,7 @@ const {
   getUsers,
 } = require('../controller/users');
 
-const initAdminUser = (app, next) => {
+const initAdminUser = async (app, next) => {
   const { adminEmail, adminPassword } = app.get('config');
   if (!adminEmail || !adminPassword) {
     return next();
@@ -21,13 +22,29 @@ const initAdminUser = (app, next) => {
     roles: { admin: true },
   };
 
-  // TODO: Create admin user
-  // First, check if adminUser already exists in the database
-  // If it doesn't exist, it needs to be saved
+  try {
+    const db = await connect();
+    const usersCollection = db.collection('users');
 
-  next();
+    const adminUserExists = await usersCollection.findOne({ email: adminEmail });
+
+    if (!adminUserExists) {
+      await usersCollection.insertOne(adminUser);
+    } else {
+      throw new Error("El usuario administrador ya existe en la colección 'users'");
+    }
+
+    // TODO: Create admin user
+    // First, check if adminUser already exists in the database
+    // If it doesn't exist, it needs to be saved
+
+    next();
+  } catch (error) {
+    // Manejar el error de la consulta a la base de datos
+    console.error('Error al verificar si el usuario administrador existe:', error);
+    next();
+  }
 };
-
 /*
  * Español:
  *
@@ -84,7 +101,6 @@ const initAdminUser = (app, next) => {
  */
 
 module.exports = (app, next) => {
-
   app.get('/users', requireAdmin, getUsers);
 
   app.get('/users/:uid', requireAuth, (req, resp) => {
