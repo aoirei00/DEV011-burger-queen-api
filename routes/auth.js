@@ -19,7 +19,8 @@ module.exports = (app, nextMain) => {
       const userExists = await usersCollection.findOne({ email });
 
       if (userExists && bcrypt.compare(password, userExists.password)) {
-        const accesoToken = jwt.sign({ id: userExists._id, email: userExists.email }, secret, { expiresIn: '1h' });
+        // jtw.sign para crear el token.
+        const accesoToken = jwt.sign({ uid: userExists._id, email: userExists.email }, secret, { expiresIn: '1h' });
         resp.json({ accesoToken });
       } else {
         resp.status(401).json({ error: 'Credenciales Invalidas' });

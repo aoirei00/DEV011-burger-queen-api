@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 
+console.log('Middleware de autenticación en ejecución.');
 module.exports = (secret) => (req, resp, next) => {
   const { authorization } = req.headers;
 
@@ -17,14 +18,27 @@ module.exports = (secret) => (req, resp, next) => {
     if (err) {
       return next(403);
     }
+    const userId = decodedToken.uid;
 
-    // TODO: Verify user identity using `decodeToken.uid`
+    if (!userId) {
+      return next(403);
+    }
+
+    req.userId = userId;
+
+    console.log('Usuario autenticado:', userId);
+
+    // Enviar una respuesta al cliente con el userId
+    return resp.status(200).json({ userId });
+    
   });
+
+  // TODO: Verify user identity using `decodeToken.uid`
 };
 
 module.exports.isAuthenticated = (req) => (
   // TODO: Decide based on the request information whether the user is authenticated
-  false
+  
 );
 
 module.exports.isAdmin = (req) => (
