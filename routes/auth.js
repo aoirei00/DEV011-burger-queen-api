@@ -17,15 +17,19 @@ module.exports = (app, nextMain) => {
       const usersCollection = db.collection('users');
 
       const userExists = await usersCollection.findOne({ email });
+      if (!userExists) {
+        return next(401);
+      }
+      const isEqual = await bcrypt.compare(password, userExists.password);
 
-      if (userExists && bcrypt.compare(password, userExists.password)) {
+      if (isEqual) {
         // jtw.sign para crear el token.
-        const accesoToken = jwt.sign({ uid: userExists._id, email: userExists.email }, secret, { expiresIn: '1h' });
-        resp.json({ accesoToken });
+        const accessToken = jwt.sign({ uid: userExists._id, email: userExists.email, role: userExists.roles }, secret, { expiresIn: '1h' });
+        resp.json({ accessToken });
       } else {
         resp.status(401).json({ error: 'Credenciales Invalidas' });
       }
-      next();
+      //next();
     } catch (error) {
       console.error('Error durante authentication:', error);
       resp.status(500).json({ error: 'Error Iterno de Servidor' });

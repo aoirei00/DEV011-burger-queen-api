@@ -13,8 +13,6 @@ async function connect() {
     console.error('Error al conectar a la base de datos:', error);
     throw new Error('No se pudo conectar a la base de datos');
   }
-
   // TODO: Database Connection
 }
-
 module.exports = { connect };

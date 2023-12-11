@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 console.log('Middleware de autenticación en ejecución.');
 module.exports = (secret) => (req, resp, next) => {
   const { authorization } = req.headers;
-
   if (!authorization) {
     return next();
   }
@@ -16,38 +15,43 @@ module.exports = (secret) => (req, resp, next) => {
 
   jwt.verify(token, secret, (err, decodedToken) => {
     if (err) {
-      return next(403);
+      return next({ status: 403, message: 'El Token es Invalido' });
     }
-    const userId = decodedToken.uid;
-
-    if (!userId) {
-      return next(403);
-    }
-
-    req.userId = userId;
-
-    console.log('Usuario autenticado:', userId);
-
-    // Enviar una respuesta al cliente con el userId
-    return resp.status(200).json({ userId });
-    
+    req.userId = decodedToken.uid;
+    req.userRole = decodedToken.role;
+    console.log('Usuario autenticado:', req.userId, 'con el rol de:', req.userRole);
+    return next();
   });
 
-  // TODO: Verify user identity using `decodeToken.uid`
+  // TODO: Verify user identity using `decodeToken.uid`//
 };
 
-module.exports.isAuthenticated = (req) => (
-  // TODO: Decide based on the request information whether the user is authenticated
-  
-);
+module.exports.isAuthenticated = (req) => {
+  const userId = req.userId ? req.userId.toString() : null;
+  if (userId) {
+    console.log('Usuario autenticado:', userId);
+    return true;
+  }
+  console.log('Usuario no autenticado');
+  return false;
+  // TODO: Decide based on the request information whether the user is authenticated //
+};
 
-module.exports.isAdmin = (req) => (
+module.exports.isAdmin = (req) => {
+  console.log('Inicio de la lógica para verificar el rol');
+  const { userRole } = req;
+  if (userRole === 'admin') {
+    console.log('El usuario es administrador');
+    return true;
+  }
+  console.log('El usuario no es administrador');
+  return false;
   // TODO: Decide based on the request information whether the user is an admin
-  false
-);
+};
 
 module.exports.requireAuth = (req, resp, next) => (
   (!module.exports.isAuthenticated(req))
+
     ? next(401)
     : next()
 );
