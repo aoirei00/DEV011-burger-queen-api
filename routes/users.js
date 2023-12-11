@@ -107,6 +107,7 @@ module.exports = (app, next) => {
   });
 
   app.post('/users', requireAdmin, (req, resp, next) => {
+    resp.json({ msg:" OK "});
     // TODO: Implement the route to add new users
   });
 
