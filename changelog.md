@@ -1,3 +1,26 @@
+## <1.0.1> - <2023-12-12>
+
+### Sprint learnings
+- Aprendi un poco mas sobre las cabeceras.
+- Aprendi como funciona el token para autorizacion de un usuario.
+- Aprendi sobre como decodificar nuestro token.
+- Aprendi un poco mas sobre la utilizacion de postman.
+- Aprendi un poco mas sobre el como se manejan las rutas.
+
+
+### Added
+
+- Se agrego la funcion para la verificacion del token.
+- Se agrego la funcion para autenticacion del usuario 
+- Se agrego la funcion que nos verifica que el usuario sea administrador.
+- Se agrego una primera version para obtener el listado de los usuarios.
+
+### Changed 
+- Se restructuro el codigo para la creacion del token.
+
+### Fixed 
+- Se resolvio el problema de que nos estaba generando un token aun asi el password no coincidira con la del usuario.
+
 ## <1.0.0> - <2023-12-05>
 
 ### Sprint learnings

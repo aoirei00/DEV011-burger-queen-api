@@ -4,10 +4,8 @@ const {
 } = require('../middleware/auth');
 
 module.exports = (app, nextMain) => {
-
-  app.get('/products',requireAuth, (req, resp, next) => {
-
-    resp.json({ msg:" OK "});
+  app.get('/products', requireAuth, (req, resp, next) => {
+    resp.json({ msg: ' OK ' });
   });
 
   app.get('/products/:productId', requireAuth, (req, resp, next) => {
