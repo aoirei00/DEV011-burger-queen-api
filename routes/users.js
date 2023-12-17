@@ -1,6 +1,5 @@
 const bcrypt = require('bcrypt');
 const { connect } = require('../connect');
-
 const {
   requireAuth,
   requireAdmin,
@@ -8,6 +7,10 @@ const {
 
 const {
   getUsers,
+  getUsersUid,
+  postUsers,
+  updateUsersUid,
+  deleteUsersUid
 } = require('../controller/users');
 
 const initAdminUser = async (app, next) => {
@@ -103,18 +106,18 @@ const initAdminUser = async (app, next) => {
 module.exports = (app, next) => {
   app.get('/users', requireAdmin, getUsers);
 
-  app.get('/users/:uid', requireAuth, (req, resp) => {
+  app.get('/users/:uid', requireAuth, getUsersUid, (req, resp) => {
   });
 
-  app.post('/users', requireAdmin, (req, resp, next) => {
+  app.post('/users', requireAdmin, postUsers, (req, resp, next) => {
 
     // TODO: Implement the route to add new users
   });
 
-  app.put('/users/:uid', requireAuth, (req, resp, next) => {
+  app.put('/users/:uid', requireAuth, updateUsersUid, (req, resp, next) => {
   });
 
-  app.delete('/users/:uid', requireAuth, (req, resp, next) => {
+  app.delete('/users/:uid', requireAuth, deleteUsersUid, (req, resp, next) => {
   });
 
   initAdminUser(app, next);
