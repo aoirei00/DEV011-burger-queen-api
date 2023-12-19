@@ -2,6 +2,14 @@ const {
   requireAuth,
 } = require('../middleware/auth');
 
+const {
+  //getOrders,
+  //getOrdersId,
+  postOrders,
+  //updateProductsUid,
+  //deleteProductsUid,
+} = require('../controller/orders');
+
 module.exports = (app, nextMain) => {
   app.get('/orders', requireAuth, (req, resp, next) => {
   });
@@ -9,7 +17,7 @@ module.exports = (app, nextMain) => {
   app.get('/orders/:orderId', requireAuth, (req, resp, next) => {
   });
 
-  app.post('/orders', requireAuth, (req, resp, next) => {
+  app.post('/orders', requireAuth, postOrders, (req, resp, next) => {
   });
 
   app.put('/orders/:orderId', requireAuth, (req, resp, next) => {

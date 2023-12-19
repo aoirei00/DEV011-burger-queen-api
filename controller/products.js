@@ -17,7 +17,7 @@ module.exports = {
     }
   },
   /// Obtener pruducto por id
-  getProductsUid: async (req, resp, next) => {
+  getProductsid: async (req, resp, next) => {
     try {
       const db = await connect();
       const productsCollection = db.collection('products');
@@ -73,7 +73,7 @@ module.exports = {
     }
   },
   /// Actualiza o edita al producto
-  updateProductsUid: async (req, resp, next) => {
+  updateProductsid: async (req, resp, next) => {
     try {
       const db = await connect();
       const productsCollection = db.collection('products');
@@ -119,7 +119,7 @@ module.exports = {
   },
 
   /// Elimina el producto
-  deleteProductsUid: async (req, resp, next) => {
+  deleteProductsid: async (req, resp, next) => {
     try {
       const db = await connect();
       const productsCollection = db.collection('products');

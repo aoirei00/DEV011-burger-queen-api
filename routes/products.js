@@ -5,10 +5,10 @@ const {
 
 const {
   getProducts,
-  getProductsUid,
+  getProductsid,
   postProducts,
-  updateProductsUid,
-  deleteProductsUid,
+  updateProductsid,
+  deleteProductsid,
 } = require('../controller/products');
 
 module.exports = (app, nextMain) => {
@@ -16,16 +16,16 @@ module.exports = (app, nextMain) => {
     // resp.json({ msg: ' OK ' });
   });
 
-  app.get('/products/:productId', requireAuth, getProductsUid, (req, resp, next) => {
+  app.get('/products/:productId', requireAuth, getProductsid, (req, resp, next) => {
   });
 
   app.post('/products', requireAdmin, postProducts, (req, resp, next) => {
   });
 
-  app.put('/products/:productId', requireAdmin, updateProductsUid, (req, resp, next) => {
+  app.put('/products/:productId', requireAdmin, updateProductsid, (req, resp, next) => {
   });
 
-  app.delete('/products/:productId', requireAdmin, deleteProductsUid, (req, resp, next) => {
+  app.delete('/products/:productId', requireAdmin, deleteProductsid, (req, resp, next) => {
   });
 
   nextMain();
