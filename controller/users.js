@@ -8,10 +8,25 @@ module.exports = {
     try {
       const db = await connect();
       const usersCollection = db.collection('users');
-      const users = await usersCollection.find().toArray();
-
-      console.log(users);
-      resp.json(users);
+  
+      // Parámetros de paginación
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query._limit) || 10;
+  
+      // Calcula el índice de inicio y fin para la paginación
+      const startIndex = (page - 1) * limit;
+      const endIndex = page * limit;
+  
+      const users = await usersCollection.find().skip(startIndex).limit(endIndex).toArray();
+      // Construye la respuesta con información de paginación
+      const response = {
+        totalItems: users.length,
+        totalPages: Math.ceil(users.length / limit),
+        currentPage: page,
+        users: users.slice(startIndex, endIndex),  // Cambiado de "orders" a "users"
+      };
+      console.log(response);
+      resp.json(response);
     } catch (error) {
       console.error(error);
       resp.status(500).json({ error: 'Error al obtener la lista de usuarios' });

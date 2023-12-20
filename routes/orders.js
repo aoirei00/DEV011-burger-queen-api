@@ -6,8 +6,8 @@ const {
   getOrders,
   getOrdersId,
   postOrders,
-  //updateProductsUid,
-  //deleteProductsUid,
+  updateOrdersId,
+  deleteOrdersId,
 } = require('../controller/orders');
 
 module.exports = (app, nextMain) => {
@@ -20,10 +20,10 @@ module.exports = (app, nextMain) => {
   app.post('/orders', requireAuth, postOrders, (req, resp, next) => {
   });
 
-  app.put('/orders/:orderId', requireAuth, (req, resp, next) => {
+  app.put('/orders/:orderId', requireAuth, updateOrdersId, (req, resp, next) => {
   });
 
-  app.delete('/orders/:orderId', requireAuth, (req, resp, next) => {
+  app.delete('/orders/:orderId', requireAuth, deleteOrdersId, (req, resp, next) => {
   });
 
   nextMain();

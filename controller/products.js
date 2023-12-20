@@ -7,10 +7,25 @@ module.exports = {
     try {
       const db = await connect();
       const productsCollection = db.collection('products');
-      const products = await productsCollection.find().toArray();
+      
+      // Parámetros de paginación
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query._limit) || 10;
 
-      console.log(products);
-      resp.json(products);
+      // Calcula el índice de inicio y fin para la paginación
+      const startIndex = (page - 1) * limit;
+      const endIndex = page * limit;
+
+      const products = await productsCollection.find().skip(startIndex).limit(limit).toArray();
+      // Construye la respuesta con información de paginación
+      const response = {
+        totalItems: products.length,
+        totalPages: Math.ceil(products.length / limit),
+        currentPage: page,
+        products: products.slice(startIndex, endIndex),
+      };
+      console.log(response);
+      resp.json(response);
     } catch (error) {
       console.error(error);
       resp.status(500).json({ error: 'Error al obtener la lista de productos' });
@@ -81,7 +96,7 @@ module.exports = {
 
       // Verifica si el ID proporcionado es válido
       if (!ObjectId.isValid(productId)) {
-        console.log('ID de prosucto no válido');
+        console.log('ID de producto no válido');
         return resp.status(400).json({ error: 'ID de producto no válido' });
       }
 

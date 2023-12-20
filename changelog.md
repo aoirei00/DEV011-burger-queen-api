@@ -1,3 +1,24 @@
+## <1.1.0> - <2023-12-20>
+
+### Sprint learnings
+- Aprendi un sobre controladores.
+- Aprendi la relacion de los controladores y las rutas.
+- Aprendi como hacer las consultas del crud para nuestra api.
+- Aprendi que datos y como hacer las solicitudes desde postman.
+
+
+### Added
+
+- Se agregaron los todos los controladores de usuarios.
+- Se agregaron los todos los controladores para productos. 
+- Se agregaron todos los controladores para ordenes .
+
+### Changed 
+- Se cambio la version para obtener el listado de usuarios ya con paginado..
+
+### Fixed 
+- Se resolvio la promesa para que nos pudiera mostrar los detalles de los productos agregados a la orde.
+
 ## <1.0.1> - <2023-12-12>
 
 ### Sprint learnings
