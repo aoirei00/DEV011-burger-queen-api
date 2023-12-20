@@ -2,6 +2,60 @@ const { ObjectId } = require('mongodb');
 const { connect } = require('../connect');
 
 module.exports = {
+  /// Controlador para mostrar lista de las ordenes
+  getOrders: async (req, resp, next) => {
+    try {
+      const db = await connect();
+      const ordersCollection = db.collection('orders');
+      const orders = await ordersCollection.find().toArray();
+      console.log(orders);
+      resp.json(orders);
+    } catch (error) {
+      console.error(error);
+      resp.status(500).json({ error: 'Error al obtener la lista de ordenes' });
+    }
+  },
+  /// Controlador para buscar orden por id
+  getOrdersId: async (req, resp, next) => {
+    try {
+      const db = await connect();
+      const ordersCollection = db.collection('orders');
+      const orderId = req.params.orderId;
+
+      // Verifica si el ID proporcionado es válido
+      if (!ObjectId.isValid(orderId)) {
+        console.log('ID de orden no válido');
+        return resp.status(400).json({ error: 'ID de orden no válido' });
+      }
+      // Convierte el ID en ObjectId
+      const objectId = new ObjectId(orderId);
+
+      // Encuentra la orden por su ID
+      const order = await ordersCollection.findOne({ _id: objectId });
+
+      if (!order) {
+        console.log('La orden no existe');
+        return resp.status(404).json({ error: 'La orden  no existe' });
+      }
+      const modifiedProducts = order.products.map(product => ({
+        qty: product.qty,
+        product: product.product || {}, // Si product.product es null, asigna un objeto vacío
+      }));
+  
+      // Modifica la orden para usar la nueva estructura de products
+      const modifiedOrder = { ...order, products: modifiedProducts };
+  
+      console.log(modifiedOrder);
+      resp.json(modifiedOrder);
+
+      console.log(order);
+      resp.json(order);
+    } catch (error) {
+
+    }
+  },
+
+  /// Controlador para crear ordenes
   postOrders: async (req, resp, next) => {
     try {
       const db = await connect();
@@ -43,7 +97,7 @@ module.exports = {
 
         productsData.push({
           qty: product.qty,
-          product: productData,
+          product: { ...productData },
         });
 
         return true;
