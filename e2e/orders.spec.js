@@ -34,6 +34,8 @@ describe('POST /orders', () => {
       fetchAsTestUser('/users/test@test.test'),
     ])
       .then((responses) => {
+        console.log('Response for creating product:', responses[0].status);
+        console.log('Response for getting user:', responses[1].status);
         expect(responses[0].status).toBe(200);
         expect(responses[1].status).toBe(200);
         return Promise.all([responses[0].json(), responses[1].json()]);

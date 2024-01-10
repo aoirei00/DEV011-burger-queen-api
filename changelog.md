@@ -1,3 +1,14 @@
+## <1.1.1> - <2024-01-10>
+
+### Changed 
+- Se hicieron unos cambios en los controladores de users
+- Se hicieron unos cambios en los controladores de products
+- Se hicieron unos cambios en los controladores de orders
+- Se hicieron algunos ajustes a algunas pruebas
+
+### Fixed 
+- Se resolvio el error de la ejecucion de pruebas
+
 ## <1.1.0> - <2023-12-20>
 
 ### Sprint learnings

@@ -15,6 +15,7 @@ module.exports = (secret) => (req, resp, next) => {
 
   jwt.verify(token, secret, (err, decodedToken) => {
     if (err) {
+      console.log(token, err);
       return next({ status: 403, message: 'El Token es Invalido' });
     }
     req.userId = decodedToken.uid;

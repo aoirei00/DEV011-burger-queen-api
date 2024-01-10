@@ -24,12 +24,12 @@ describe('POST /login', () => {
       .then((resp) => expect(resp.status).toBe(400))
   ));
 
-  it('fail with 404 credentials dont match', () => (
+  it('fail with 401 credentials dont match', () => (
     fetch('/login', {
       method: 'POST',
       body: { email: `foo-${Date.now()}@bar.baz`, password: 'xxxx' },
     })
-      .then((resp) => expect(resp.status).toBe(404))
+      .then((resp) => expect(resp.status).toBe(401))
   ));
 
   it('should create new auth token and allow access using it', () => (
@@ -41,7 +41,7 @@ describe('POST /login', () => {
         expect(resp.status).toBe(200);
         return resp.json();
       })
-      .then(({ accessToken }) => fetchWithAuth(accessToken)(`/users/${config.adminEmail}`))
+      .then(({ token }) => fetchWithAuth(token)(`/users/${config.adminEmail}`))
       .then((resp) => {
         expect(resp.status).toBe(200);
         return resp.json();

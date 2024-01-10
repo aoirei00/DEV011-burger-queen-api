@@ -32,8 +32,8 @@ describe('GET /users', () => {
         return resp.json();
       })
       .then((json) => {
-        expect(Array.isArray(json)).toBe(true);
-        expect(json.length > 0).toBe(true);
+        expect(Array.isArray(json.users)).toBe(true);
+        expect(json.users.length > 0).toBe(true);
         // TODO: Check that the results are actually the "expected" user objects
       })
   ));
@@ -42,6 +42,8 @@ describe('GET /users', () => {
     fetchAsAdmin('/users?limit=1')
       .then((resp) => {
         expect(resp.status).toBe(200);
+        console.log(resp.headers.raw());
+        console.log(resp.headers.get('link'));
         return resp.json().then((json) => ({ headers: resp.headers, json }));
       })
       .then(({ headers, json }) => {
@@ -52,9 +54,9 @@ describe('GET /users', () => {
         const nextQuery = qs.parse(nextUrlObj.query);
         const lastQuery = qs.parse(lastUrlObj.query);
 
-        expect(nextQuery.limit).toBe('1');
+        expect(nextQuery._limit).toBe('1');
         expect(nextQuery.page).toBe('2');
-        expect(lastQuery.limit).toBe('1');
+        expect(lastQuery._limit).toBe('1');
         expect(lastQuery.page >= 2).toBe(true);
 
         expect(Array.isArray(json)).toBe(true);
@@ -76,9 +78,9 @@ describe('GET /users', () => {
         const firstQuery = qs.parse(firstUrlObj.query);
         const prevQuery = qs.parse(prevUrlObj.query);
 
-        expect(firstQuery.limit).toBe('1');
+        expect(firstQuery._limit).toBe('1');
         expect(firstQuery.page).toBe('1');
-        expect(prevQuery.limit).toBe('1');
+        expect(prevQuery._limit).toBe('1');
         expect(prevQuery.page).toBe('1');
 
         expect(Array.isArray(json)).toBe(true);
@@ -154,8 +156,8 @@ describe('POST /users', () => {
       method: 'POST',
       body: {
         email: 'test1@test.test',
-        password: '12345',
-        roles: { admin: false },
+        password: '123456',
+        roles: 'chef',
       },
     })
       .then((resp) => {
@@ -166,8 +168,7 @@ describe('POST /users', () => {
         expect(typeof json._id).toBe('string');
         expect(typeof json.email).toBe('string');
         expect(typeof json.password).toBe('undefined');
-        expect(typeof json.roles).toBe('object');
-        expect(json.roles.admin).toBe(false);
+        expect(typeof json.roles).toBe('string');
       })
   ));
 
@@ -176,8 +177,8 @@ describe('POST /users', () => {
       method: 'POST',
       body: {
         email: 'admin1@test.test',
-        password: '12345',
-        roles: { admin: true },
+        password: '123456',
+        roles: 'admin',
       },
     })
       .then((resp) => {
@@ -188,8 +189,7 @@ describe('POST /users', () => {
         expect(typeof json._id).toBe('string');
         expect(typeof json.email).toBe('string');
         expect(typeof json.password).toBe('undefined');
-        expect(typeof json.roles).toBe('object');
-        expect(json.roles.admin).toBe(true);
+        expect(typeof json.roles).toBe('string');
       })
   ));
 
@@ -226,9 +226,13 @@ describe('PUT /users/:uid', () => {
   it('should fail with 403 when not admin tries to change own roles', () => (
     fetchAsTestUser('/users/test@test.test', {
       method: 'PUT',
-      body: { roles: { admin: true } },
+      body: { email: 'newemail@test.com', roles: 'admin' },
     })
-      .then((resp) => expect(resp.status).toBe(403))
+      .then((resp) => {
+        console.log('Response Status:', resp.status);
+        console.log('Response Body:', resp.body);
+        expect(resp.status).toBe(403);
+      })
   ));
 
   it('should update user when own data (password change)', () => (

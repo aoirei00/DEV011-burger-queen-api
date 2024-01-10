@@ -9,7 +9,6 @@ module.exports = (app, nextMain) => {
   app.post('/login', async (req, resp, next) => {
     try {
       const { email, password } = req.body;
-
       if (!email || !password) {
         return next(400);
       }
@@ -21,12 +20,13 @@ module.exports = (app, nextMain) => {
         return next(401);
       }
       const isEqual = await bcrypt.compare(password, userExists.password);
-
       if (isEqual) {
         // jtw.sign para crear el token.
         const accessToken = jwt.sign({ uid: userExists._id, email: userExists.email, role: userExists.roles }, secret, { expiresIn: '1h' });
-        resp.json({ accessToken });
+        console.log("pass valido:", accessToken);
+        resp.json({ token: accessToken });
       } else {
+        console.log("pass invalido");
         resp.status(401).json({ error: 'Credenciales Invalidas' });
       }
       //next();

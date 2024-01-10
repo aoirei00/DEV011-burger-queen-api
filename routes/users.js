@@ -110,7 +110,7 @@ module.exports = (app, next) => {
   });
 
   app.post('/users', requireAdmin, postUsers, (req, resp, next) => {
-
+    console.log("NOOOOOOOOOO!!")
     // TODO: Implement the route to add new users
   });
 

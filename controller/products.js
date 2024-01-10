@@ -7,7 +7,7 @@ module.exports = {
     try {
       const db = await connect();
       const productsCollection = db.collection('products');
-      
+
       // Parámetros de paginación
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query._limit) || 10;
@@ -41,7 +41,7 @@ module.exports = {
       // Verifica si el ID proporcionado es válido
       if (!ObjectId.isValid(productId)) {
         console.log('ID de producto no válido');
-        return resp.status(400).json({ error: 'ID de producto no válido' });
+        return resp.status(404).json({ error: 'ID de producto no válido' });
       }
 
       // Convierte el ID en ObjectId
@@ -69,19 +69,26 @@ module.exports = {
       const db = await connect();
       const productsCollection = db.collection('products');
       const existingproduct = await productsCollection.findOne({ name: req.body.name });
+
       if (existingproduct) {
         console.log('El producto ya existe');
         return resp.status(400).json({ error: 'El producto ya existe' });
       }
+
+      // Verificar propiedades requeridas
+      if (!req.body.name || !req.body.price) {
+        console.log('Propiedades faltantes o incorrectas');
+        return resp.status(400).json({ error: 'Propiedades faltantes o incorrectas' });
+      }
       const newProduct = {
         name: req.body.name,
-        price: req.body.price,
+        price: parseFloat(req.body.price),
         image: req.body.image,
         type: req.body.type,
       };
       await productsCollection.insertOne(newProduct);
       console.log('Se agrego el producto con exito!!');
-      resp.status(201).json(newProduct);
+      resp.status(200).json(newProduct);
     } catch (error) {
       console.log('Error al agregar producto');
       resp.status(500).json({ error: 'Error al agregar un nuevo producto' });
@@ -99,7 +106,6 @@ module.exports = {
         console.log('ID de producto no válido');
         return resp.status(400).json({ error: 'ID de producto no válido' });
       }
-
       // Convierte el ID en ObjectId
       const objectId = new ObjectId(productId);
 
@@ -110,9 +116,17 @@ module.exports = {
         console.log('El producto no existe');
         return resp.status(404).json({ error: 'El producto no existe' });
       }
+      const authenticatedUserId = req.userId ? req.userId.toString() : null;
+      if (
+        authenticatedUserId !== product._id.toString() &&
+          (req.userRole !== 'admin')
+      ) {
+        console.log('No autorizado');
+        return resp.status(403).json({ error: 'No autorizado' });
+      }
       const updatedData = {
         name: req.body.name,
-        price: req.body.price,
+        price: parseFloat(req.body.price),
         image: req.body.image,
         type: req.body.type,
       };
