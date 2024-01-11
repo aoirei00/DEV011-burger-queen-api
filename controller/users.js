@@ -3,7 +3,7 @@ const { ObjectId } = require('mongodb');
 const { connect } = require('../connect');
 
 module.exports = {
-  /// Obtener listade de todos los usuarios
+  /// Obtener lista de de todos los usuarios
   getUsers: async (req, resp, next) => {
     try {
       const db = await connect();
@@ -134,6 +134,7 @@ module.exports = {
       } else {
         // Si no es un ID válido, asume que es un correo electrónico
         user = await usersCollection.findOne({ email: userId });
+        objectId = user ? user._id : null; // Obtén el _id del usuario si se encontró por correo
       }
 
       if (!user) {
@@ -142,45 +143,56 @@ module.exports = {
       }
       // Verificar si el usuario autenticado es el propietario o un administrador
       const authenticatedUserId = req.userId ? req.userId.toString() : null;
-      console.log('Authenticated User ID:', authenticatedUserId);
-      console.log('User ID from request:', req.params.uid);
-      console.log('User Role:', req.userRole);
       if (authenticatedUserId !== user._id.toString() && req.userRole !== 'admin') {
         console.log('No autorizado');
         return resp.status(403).json({ error: 'No autorizado' });
       }
-      // Verificación de actualización de propiedades
-      if (!req.body.email && !req.body.password && !req.body.roles) {
+    // Verificación de actualización de propiedades
+      const updatedData = {};
+
+      if (req.body.email !== undefined && req.body.email !== null) {
+        updatedData.email = req.body.email;
+      }
+
+      if (req.body.password !== undefined && req.body.password !== null) {
+        const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+        updatedData.password = hashedPassword;
+      }
+
+      if (req.body.roles !== undefined && req.body.roles !== null) {
+      // Verificar si el usuario autenticado es un administrador
+        if (req.userRole === 'admin') {
+          updatedData.roles = req.body.roles;
+        } else {
+          console.log('No autorizado para cambiar roles');
+          return resp.status(403).json({ error: 'No autorizado para cambiar roles' });
+        }
+      }
+
+      if (req.body.roles) {
+      // Verificar si el usuario autenticado es un administrador
+        if (req.userRole === 'admin') {
+          updatedData.roles = req.body.roles;
+        } else {
+          console.log('No autorizado para cambiar roles');
+          return resp.status(403).json({ error: 'No autorizado para cambiar roles' });
+        }
+      }
+
+      // Verifica que haya al menos una propiedad para actualizar
+      if (Object.keys(updatedData).length === 0) {
         console.log('No hay propiedades para actualizar');
         return resp.status(400).json({ error: 'No hay propiedades para actualizar' });
       }
-      if (!req.body.password) {
-        console.log('Contraseña es obligatoria');
-        return resp.status(400).json({ error: 'Contraseña es obligatoria' });
-      }
-      const hashedPassword = bcrypt.hashSync(req.body.password, 10);
-  
-      const updatedData = {
-        email: req.body.email,
-        password: hashedPassword,
-        roles: req.body.roles,
-      };
-
       // Realiza la actualización del usuario
-      if (req.userRole === 'admin') {
-        const result = await usersCollection.updateOne({ _id: objectId }, { $set: updatedData });
-        delete updatedData.password;
+      const result = await usersCollection.updateOne({ _id: objectId }, { $set: updatedData });
 
-        if (result.modifiedCount === 1) {
-          console.log('Usuario actualizado con éxito');
-          resp.status(200).json({ message: 'Usuario actualizado con éxito' });
-        } else {
-          console.log('No se pudo actualizar el usuario');
-          resp.status(500).json({ error: 'No se pudo actualizar el usuario' });
-        }
+      if (result.modifiedCount === 1) {
+        console.log('Usuario actualizado con éxito');
+        resp.status(200).json({ message: 'Usuario actualizado con éxito' });
       } else {
-        console.log('No autorizado para cambiar roles');
-        resp.status(403).json({ error: 'No autorizado para cambiar roles' });
+        console.log('No se pudo actualizar el usuario');
+        resp.status(500).json({ error: 'No se pudo actualizar el usuario' });
       }
     } catch (error) {
       console.error(error);
@@ -195,15 +207,16 @@ module.exports = {
       const usersCollection = db.collection('users');
       const userId = req.params.uid;
 
-      let user;
+      let user, objectId;
 
       // Verifica si el parámetro es un ID válido
       if (ObjectId.isValid(userId)) {
-        const objectId = new ObjectId(userId);
+        objectId = new ObjectId(userId);
         user = await usersCollection.findOne({ _id: objectId });
       } else {
         // Si no es un ID válido, asume que es un correo electrónico
         user = await usersCollection.findOne({ email: userId });
+        objectId = user ? user._id : null; // Obtén el _id del usuario si se encontró por correo
       }
 
       if (!user) {
@@ -212,12 +225,14 @@ module.exports = {
       }
       // Verificar si el usuario autenticado es el propietario o un administrador
       const authenticatedUserId = req.userId ? req.userId.toString() : null;
-      if (
-        authenticatedUserId !== user._id.toString() &&
-        (req.userRole !== 'admin' || authenticatedUserId !== user._id.toString())
-      ) {
+      if (authenticatedUserId !== user._id.toString() && req.userRole !== 'admin') {
         console.log('No autorizado');
         return resp.status(403).json({ error: 'No autorizado' });
+      }
+
+      if (!user) {
+        console.log('El usuario no existe');
+        return resp.status(404).json({ error: 'El usuario no existe' });
       }
 
       await usersCollection.deleteOne({ _id: objectId });
