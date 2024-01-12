@@ -2,6 +2,14 @@ const bcrypt = require('bcrypt');
 const { ObjectId } = require('mongodb');
 const { connect } = require('../connect');
 
+// Función para construir el encabezado 'Link'
+function buildLinkHeader(req, responseData) {
+  const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}`;
+  const nextPageUrl = `${baseUrl}?page=${responseData.currentPage + 1}&_limit=${responseData.limit}`;
+  const lastPageUrl = `${baseUrl}?page=${responseData.totalPages}&_limit=${responseData.limit}`;
+  return `<${lastPageUrl}>; rel="last", <${nextPageUrl}>; rel="next"`;
+}
+
 module.exports = {
   /// Obtener lista de de todos los usuarios
   getUsers: async (req, resp, next) => {
@@ -12,21 +20,38 @@ module.exports = {
       // Parámetros de paginación
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query._limit) || 10;
-  
+
+      // Realiza una consulta para obtener el total de usuarios
+      const totalUsers = await usersCollection.countDocuments();
+
       // Calcula el índice de inicio y fin para la paginación
       const startIndex = (page - 1) * limit;
-      const endIndex = page * limit;
-  
+      const endIndex = page === 1 ? limit : page * limit;
+
       const users = await usersCollection.find().skip(startIndex).limit(endIndex).toArray();
+
       // Construye la respuesta con información de paginación
-      const response = {
-        totalItems: users.length,
-        totalPages: Math.ceil(users.length / limit),
+      const responseData = {
+        totalItems: totalUsers,
+        totalPages: Math.ceil(totalUsers / limit),
         currentPage: page,
-        users: users.slice(startIndex, endIndex),  
+        users: users,  
+        limit: limit,
       };
-      console.log(response);
-      resp.json(response);
+
+      // Imprimir valores para depuración
+      console.log('Response:', responseData);
+
+      // Generar el encabezado Link solo si hay más de una página
+      if (responseData.totalPages > 1) {
+        console.log('Generating Link Header...');
+        const linkHeader = buildLinkHeader(req, responseData);
+        // Imprimir valores para depuración
+        console.log('Link Header:', linkHeader);
+        resp.set('Link', linkHeader);
+      }
+
+      resp.json(responseData);
     } catch (error) {
       console.error(error);
       resp.status(500).json({ error: 'Error al obtener la lista de usuarios' });

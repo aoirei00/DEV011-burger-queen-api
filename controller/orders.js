@@ -127,7 +127,7 @@ module.exports = {
       console.log('New Order:', newOrder);
       await ordersCollection.insertOne(newOrder);
       console.log('Se agregó la orden con éxito!!');
-      resp.status(201).json(newOrder);
+      resp.status(200).json(newOrder);
     } catch (error) {
       console.log('Error al agregar la orden');
       resp.status(500).json({ error: 'Error al agregar una nueva orden' });

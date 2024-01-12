@@ -102,17 +102,17 @@ describe('PUT /products/:productid', () => {
   it('should fail with 403 when not admin', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'Test', price: 10 },
+      body: { name: 'Test', price: 10, image: 'test.img', type: 'test type' },
     })
-      .then((resp) => {
-        expect(resp.status).toBe(200);
-        return resp.json();
-      })
+      .then((resp) => resp.json())
       .then((json) => fetchAsTestUser(`/products/${json._id}`, {
         method: 'PUT',
         body: { price: 20 },
       }))
-      .then((resp) => expect(resp.status).toBe(403))
+      .then((resp) => resp.json())
+      .then((json) => {
+        expect(json.statusCode).toBe(403);
+      })
   ));
 
   it('should fail with 404 when admin and not found', () => (
@@ -126,7 +126,7 @@ describe('PUT /products/:productid', () => {
   it('should fail with 400 when bad props', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'Test', price: 10 },
+      body: { name: 'Test4', price: 10, image: 'test.img', type: 'test type' },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -142,7 +142,7 @@ describe('PUT /products/:productid', () => {
   it('should update product as admin', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'Test', price: 10 },
+      body: { name: 'Test5', price: 10, image: 'test.img', type: 'test type' },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -169,7 +169,7 @@ describe('DELETE /products/:productid', () => {
   it('should fail with 403 when not admin', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'Test', price: 10 },
+      body: { name: 'Test6', price: 10, image: 'test.img', type: 'test type' },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -187,7 +187,7 @@ describe('DELETE /products/:productid', () => {
   it('should delete other product as admin', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'Test', price: 10 },
+      body: { name: 'Test9', price: 10, image: 'test.img', type: 'test type' },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);

@@ -9,11 +9,25 @@ const {
   fetchWithAuth,
 } = process;
 
-const parseLinkHeader = (str) => str.split(',')
-  .reduce((memo, item) => {
-    const [, value, key] = /^<(.*)>;\s+rel="(first|last|prev|next)"/.exec(item.trim());
-    return { ...memo, [key]: value };
-  }, {});
+const parseLinkHeader = (str) => {
+  if (!str) {
+    return null; // O manejar de alguna otra manera si es necesario
+  }
+
+  // Utilizamos una expresión regular para extraer los enlaces
+  const linkRegex = /<([^>]+)>;\s*rel="([^"]+)"/g;
+  const matches = Array.from(str.matchAll(linkRegex));
+
+  // Creamos un objeto con los resultados
+  const linkHeader = {};
+  matches.forEach(match => {
+    const [, value, key] = match;
+    linkHeader[key] = value;
+  });
+
+  return linkHeader;
+};
+
 
 describe('GET /users', () => {
   it('should fail with 401 when no auth', () => (
@@ -39,37 +53,61 @@ describe('GET /users', () => {
   ));
 
   it('should get users with pagination', () => (
-    fetchAsAdmin('/users?limit=1')
+    fetchAsAdmin('/users?page=1&_limit=1')
       .then((resp) => {
         expect(resp.status).toBe(200);
-  
-        // Verificar si el encabezado 'link' está presente
-        const linkHeader = resp.headers.get('link');
-        if (!linkHeader) {
-          console.error('Link header is missing');
-          return Promise.reject('Link header is missing');
-        }
-  
-        const linkHeaderObj = parseLinkHeader(linkHeader);
-  
-        const nextUrlObj = url.parse(linkHeaderObj.next);
-        const lastUrlObj = url.parse(linkHeaderObj.last);
-        const nextQuery = qs.parse(nextUrlObj.query);
-        const lastQuery = qs.parse(lastUrlObj.query);
-  
-        expect(nextQuery._limit).toBe('1');
-        expect(nextQuery.page).toBe('2');
-        expect(lastQuery._limit).toBe('1');
-        expect(lastQuery.page >= 2).toBe(true);
-  
         return resp.json().then((json) => ({ headers: resp.headers, json }));
       })
       .then(({ headers, json }) => {
-        // ... Resto de la prueba
+        const linkHeader = parseLinkHeader(headers.get('link'));
+        expect(linkHeader).toBeDefined()
+        
+        // Agrega este console.log para depurar
+        console.log('Link Header:', linkHeader);
+
+        const parsedLinkHeader = parseLinkHeader(linkHeader);
+
+        // Agrega este console.log para depurar
+        console.log('/////////////////////Parsed Link Header:', parsedLinkHeader);
+
+        const nextUrlObj = url.parse(linkHeader.next);
+        const lastUrlObj = url.parse(linkHeader.last);
+        const nextQuery = qs.parse(nextUrlObj.query);
+        const lastQuery = qs.parse(lastUrlObj.query);
+
+        expect(nextQuery.limit).toBe('1');
+        expect(nextQuery.page).toBe('2');
+        expect(lastQuery.limit).toBe('1');
+        expect(lastQuery.page >= 2).toBe(true);
+
+        expect(Array.isArray(json)).toBe(true);
+        expect(json.length).toBe(1);
+        expect(json[0]).toHaveProperty('_id');
+        expect(json[0]).toHaveProperty('email');
+        return fetchAsAdmin(nextUrlObj.path);
       })
-      .catch((error) => {
-        // Manejar el error, por ejemplo, imprimir un mensaje
-        console.error(error);
+      .then((resp) => {
+        expect(resp.status).toBe(200);
+        return resp.json().then((json) => ({ headers: resp.headers, json }));
+      })
+      .then(({ headers, json }) => {
+        const linkHeader = parseLinkHeader(headers.get('link'));
+
+        const firstUrlObj = url.parse(linkHeader.first);
+        const prevUrlObj = url.parse(linkHeader.prev);
+
+        const firstQuery = qs.parse(firstUrlObj.query);
+        const prevQuery = qs.parse(prevUrlObj.query);
+
+        expect(firstQuery.limit).toBe('1');
+        expect(firstQuery.page).toBe('1');
+        expect(prevQuery.limit).toBe('1');
+        expect(prevQuery.page).toBe('1');
+
+        expect(Array.isArray(json)).toBe(true);
+        expect(json.length).toBe(1);
+        expect(json[0]).toHaveProperty('_id');
+        expect(json[0]).toHaveProperty('email');
       })
   ));
 });
