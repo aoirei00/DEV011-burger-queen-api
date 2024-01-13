@@ -43,7 +43,7 @@ module.exports = {
       // Verifica si el ID proporcionado es válido
       if (!ObjectId.isValid(orderId)) {
         console.log('ID de orden no válido');
-        return resp.status(400).json({ error: 'ID de orden no válido' });
+        return resp.status(404).json({ error: 'ID de orden no válido' });
       }
       // Convierte el ID en ObjectId
       const objectId = new ObjectId(orderId);
@@ -160,7 +160,7 @@ module.exports = {
       // Extrae información necesaria del cuerpo de la solicitud
       const { userId, client, products } = req.body;
 
-      // Verifica si el ID de usuario proporcionado es válido
+      // Verifica si el ID de la orden proporcionado es válido
       if (!ObjectId.isValid(userId)) {
         console.log('ID de usuario no válido');
         return resp.status(400).json({ error: 'ID de usuario no válido' });
@@ -234,7 +234,7 @@ module.exports = {
       // Verifica si el ID proporcionado es válido
       if (!ObjectId.isValid(orderId)) {
         console.log('ID de orden no válido');
-        return resp.status(400).json({ error: 'ID de orden no válido' });
+        return resp.status(404).json({ error: 'ID de orden no válido' });
       }
       // Convierte el ID en ObjectId
       const objectId = new ObjectId(orderId);
@@ -246,15 +246,20 @@ module.exports = {
         console.log('La orden no existe');
         return resp.status(404).json({ error: 'La orden no existe' });
       }
-      await ordersCollection.deleteOne({ _id: objectId });
 
-      console.log('Orden eliminada con éxito');
-      resp.status(200).json({ message: 'Orden eliminada con éxito' });
+      // Verifica si el usuario tiene el rol de administrador
+      if (req.user && req.user.role === 'admin') {  
+        await ordersCollection.deleteOne({ _id: objectId });
+        console.log('Orden eliminada con éxito');
+        resp.status(200).json({ message: 'Orden eliminada con éxito' });
+      } else {
+        console.log('Usuario no autorizado para eliminar la orden');
+        resp.status(403).json({ error: 'No autorizado para eliminar la orden' });
+      }
     } catch (error) {
-      // Manejo de errores
+    // Manejo de errores
       console.error('Error al obtener la orden por ID:', error);
       resp.status(500).json({ error: 'Error al obtener la orden por ID' });
     }
   },
-
 };
