@@ -1,3 +1,22 @@
+## <1.2.0> - <2024-01-16>
+
+### Sprint learnings
+- Aprendi sobre despliegue con vercel. 
+- Aprendi a crear conexion desde MongoDB atlas.
+- Aprendi un poco mas a como identificar el por que no pasan los test.
+
+### Added
+- Archivo .env
+- .env al git ignore
+- Readme
+
+### Changed 
+- Se hicieron unos cambios en los controladores de users
+- Se hicieron unos cambios en los controladores de products
+- Se hicieron unos cambios en los controladores de orders
+- Se hicieron algunos ajustes a algunas pruebas
+
+
 ## <1.1.1> - <2024-01-10>
 
 ### Changed 
