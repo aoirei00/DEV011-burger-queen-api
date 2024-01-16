@@ -239,7 +239,7 @@ describe('GET /orders/:orderId', () => {
         expect(json.products[0].product.price).toBe(99);
       })
   ));
-/// ////////////////////////////////////////////////////////
+
   it('should get order as admin', () => (
     Promise.all([
       fetchAsAdmin('/products', {
@@ -292,7 +292,7 @@ describe('PUT /orders/:orderId', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 66 },
+        body: { name: 'Test111', price: 66 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -319,7 +319,7 @@ describe('PUT /orders/:orderId', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 66 },
+        body: { name: 'Test222', price: 66 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -342,12 +342,12 @@ describe('PUT /orders/:orderId', () => {
       }))
       .then((resp) => expect(resp.status).toBe(400))
   ));
-
+  /// ///////////////////////////////////////////////////////////////////////////
   it('should update order (set status to preparing)', () => (
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 66 },
+        body: { name: 'Test22114', price: 66 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -358,13 +358,14 @@ describe('PUT /orders/:orderId', () => {
       })
       .then(([product, user]) => fetchAsTestUser('/orders', {
         method: 'POST',
-        body: { products: [{ productId: product._id, qty: 5 }], userId: user._id },
+        body: { products: [{ productId: product._id, qty: 5 }], userId: user._id, status: 'pending' },
       }))
       .then((resp) => {
         expect(resp.status).toBe(200);
         return resp.json();
       })
       .then((json) => {
+        console.log('===========>Respuesta después de crear la orden:', json);
         expect(json.status).toBe('pending');
         return fetchAsAdmin(`/orders/${json._id}`, {
           method: 'PUT',
@@ -377,12 +378,12 @@ describe('PUT /orders/:orderId', () => {
       })
       .then((json) => expect(json.status).toBe('preparing'))
   ));
-
+  /// ///////////////////////////////////////////////////////////////////////////
   it('should update order (set status to delivering)', () => (
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 66 },
+        body: { name: 'Test7677', price: 66 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])
@@ -467,7 +468,7 @@ describe('DELETE /orders/:orderId', () => {
     Promise.all([
       fetchAsAdmin('/products', {
         method: 'POST',
-        body: { name: 'Test', price: 25 },
+        body: { name: 'Test666', price: 25 },
       }),
       fetchAsTestUser('/users/test@test.test'),
     ])

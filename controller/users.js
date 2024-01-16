@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const { ObjectId } = require('mongodb');
 const { connect } = require('../connect');
 
+
 // Función para construir el encabezado 'Link'
 function buildLinkHeader(req, responseData) {
   const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}`;
